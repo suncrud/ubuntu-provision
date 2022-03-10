@@ -12,7 +12,7 @@ Provisioning script template for ubuntu virtual environment using vagrant or mul
 
 ```
 ## ~/.bashrc # or your file of choice.
-export VAGRANT_DEFAULT_TEMPLATE=~/path/to/ubuntu-provision/vagrant/Vagrantfile.erb
+export VAGRANT_DEFAULT_TEMPLATE=/path/to/ubuntu-provision/vagrant/Vagrantfile.erb
 ```
 
 ```
@@ -43,5 +43,5 @@ $ vagrant up
 3. edit cloud-init.yml to include variables or scripts
 4. launch multipass 
 ```
-$ multipass launch -n project_name --cloud-init path/to/cloud-init.yml
+$ multipass launch -n project_name --cloud-init /path/to/cloud-init.yml
 ```
