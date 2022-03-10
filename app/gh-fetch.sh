@@ -28,7 +28,7 @@ die() {
 args=("$@")
 [[ ${#args[@]} -eq 0 ]] && die "Missing script arguments: app name."
 
-allowed_apps=(hugo jq yq)
+allowed_apps=(hugo jq yq drupalorg benthos drush-launcher cloudflared)
 allowed_app_list=$(IFS=, ; echo "${allowed_apps[*]}")
 if ! [[ "${allowed_apps[*]}" =~ "$1" ]]; then
   echo "$1 is not avaliable. ($allowed_app_list)"
@@ -40,6 +40,10 @@ case "$1" in
   "hugo") gh_repo="gohugoio/hugo"; pattern="browser_download_url.*hugo_extended.*_Linux-64bit\.tar\.gz" ;;
   "jq") gh_repo="stedolan/jq"; pattern="browser_download_url.*jq-linux64" ;;
   "yq") gh_repo="mikefarah/yq"; pattern="browser_download_url.*yq_linux_amd64" ;;
+  "drupalorg") gh_repo="mglaman/drupalorg-cli"; pattern="browser_download_url.*drupalorg.phar" ;;
+  "benthos") gh_repo="Jeffail/benthos"; pattern="browser_download_url.*_linux_amd64.tar.gz" ;;
+  "drush-launcher") gh_repo="drush-ops/drush-launcher"; pattern="browser_download_url.*drush.phar" ;;
+  "cloudflared") gh_repo="cloudflare/cloudflared"; pattern="browser_download_url.*cloudflared-linux-amd64" ;;
   *) gh_repo=""; pattern="" ;;
 esac
 
@@ -68,16 +72,20 @@ echo fetching $1 binary from github...
 url=$(echo $gh_api_latest_url | tr -d "\"")
 if [[ $url == *.tar.gz ]]; then
   curl -sSL $url | tar xz
+  # @TODO: CHANGELOG.md, LICENSE, README.md from benthos
   filename=$1
 else
-  eval "curl -sSL -O $url"
+  curl -sSL -O $url
   filename=$(basename $url)
 fi
 
 if [ ! -v $filename ] && [ -f $filename ]; then
   chmod +x $filename && sudo mv $filename /usr/local/bin/$1
-  if [ "hugo" == "$1" ]; then
+  if [ "hugo" == "$1" ] || [ "drush-launcher" == "$1" ]
+  then
     $1 version
+  elif [ "benthos" == "$1" ]; then
+    $1 -v
   else
     $1 -V
   fi
