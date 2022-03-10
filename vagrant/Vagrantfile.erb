@@ -1,28 +1,34 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
-<% project_code = File.basename(Dir.getwd)
-box_code = "ubuntu/focal64"
-box_code = box_name unless box_name == "base"
-script_path = ENV["VAGRANT_DEFAULT_TEMPLATE"].sub("/vagrant/Vagrantfile.erb", "")
-env_source =  File.expand_path(script_path + "/env.example")
-env_destination = File.expand_path(Dir.getwd) + "/.env" -%>
+<% 
+  ### variables ### 
+  project_code = File.basename(Dir.getwd)
+  provider = "libvirt"
+  box_code = "generic/ubuntu2004" # for libvirt
+  # box_code = "ubuntu/focal64" # for virtualbox
+  # box_code = box_name unless box_name == "base"
+  script_path = ENV["VAGRANT_DEFAULT_TEMPLATE"].sub("/vagrant/Vagrantfile.erb", "")
+  env_source =  File.expand_path(script_path + "/env.example")
+  env_destination = File.expand_path(Dir.getwd) + "/.env" 
+-%>
 
 Vagrant.configure("2") do |config|
   config.vm.define "<%= project_code %>" do |node|
     node.vm.box = "<%= box_code %>"
-    node.vm.hostname = "<%= project_code %>"
-    node.vm.network "private_network", ip: "192.168.61.10"
-    node.vm.provider "virtualbox" do |vb|
-      vb.name = "<%= project_code %>"
-      vb.cpus = 1
-      vb.memory = 1024
+    node.vm.hostname = "<%= project_code %>-vagrant" 
+    node.vm.provider "<%= provider %>" do |p|
+      p.cpus = 1
+      p.memory = 1024
     end
+    ### configure network
+    # node.vm.network "private_network", ip: "192.168.0.0"
 
+    ### provisions
     node.vm.provision "file", source: "~/.gitconfig", destination: ".gitconfig"
     node.vm.provision "file", source: "~/.ssh/id_rsa", destination: ".ssh/"
     node.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: ".ssh/"
     <% if File.file?(env_source) %>
-    # <%= env_source %>
+    ### <%= env_source %> ###
     node.vm.provision "file", source: "./.env", destination: ".env"
     <% if File.file?(env_destination) %>
       <% open(env_destination, 'a') { |f| f << "\n# #{env_destination}\n" + File.read(env_source) } %>
