@@ -5,6 +5,24 @@ if [ ! "`whoami`" = "root" ]; then
   exit 1
 fi
 
+if [ -f /home/vagrant/.env ]; then
+  cp /home/vagrant/.env /root/.env
+fi
+
+if [ -f /home/vagrant/.ssh/id_rsa ]; then
+  mkdir -p /root/.ssh
+  cp /home/vagrant/.ssh/id_rsa /root/.ssh/id_rsa
+fi
+
+if [ -f /home/vagrant/.ssh/id_rsa.pub ]; then
+  mkdir -p /root/.ssh
+  cp /home/vagrant/.ssh/id_rsa.pub /root/.ssh/id_rsa.pub
+fi
+
+if [ -f /home/vagrant/.gitconfig ]; then
+  cp /home/vagrant/.gitconfig /root/.gitconfig
+fi
+
 if [ -f /root/.env ]; then
   export $(cat /root/.env | grep -v '#' | awk '/=/ {print $1}')
 fi
@@ -61,9 +79,11 @@ echo 'alias up="sudo apt update && sudo apt upgrade -y && sudo apt autoremove -y
 echo [bootstrap] ssh key, github
 ssh-keyscan github.com >> /home/$UBUNTU_USER/.ssh/known_hosts
 if [ -f /root/.ssh/id_rsa ]; then
+  mkdir -p /home/$UBUNTU_USER/.ssh/
   cp /root/.ssh/id_rsa /home/$UBUNTU_USER/.ssh/
   chmod 700 /home/$UBUNTU_USER/.ssh/
   chmod 600 /home/$UBUNTU_USER/.ssh/id_rsa
+  chown -R ubuntu:ubuntu /home/$UBUNTU_USER/.ssh/
 fi
 
 echo [bootstrap] vscode
